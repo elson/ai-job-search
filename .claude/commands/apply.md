@@ -8,7 +8,7 @@ Follow these steps **exactly in order**. Do not skip steps.
 - Never re-Read a file whose contents are already in your context from an earlier step. If you read it in Step 1, it is still available in Step 2.
 - When dispatching the reviewer agent, pass draft content **inline in the agent prompt** rather than asking the agent to Read files you already have in memory.
 - Run the full verification checklist exactly once, at the end (Step 6). The reviewer focuses on content critique, not verification.
-- Step 5 (compile and inspect PDFs) is mandatory and non-skippable — LaTeX page-break decisions are unpredictable, and `.tex` files that look fine often produce broken PDFs (orphaned entry titles, cover letters spilling to page 2, bullet fonts mismatching).
+- Step 5 (render and inspect PDFs) is mandatory and non-skippable — source files that look fine can still render to the wrong page count (CV running to 3 pages, cover letter spilling to page 2).
 
 ---
 
@@ -59,21 +59,21 @@ Read only the reference files you do not yet have:
 - `.claude/skills/job-application-assistant/05-cv-templates.md`
 - `.claude/skills/job-application-assistant/06-cover-letter-templates.md`
 
-Also read the most recent existing CV and cover letter files for concrete structural reference (one of each is enough):
-- Read any existing `cv/main_*.tex` file as a LaTeX template reference
-- Read any existing `cover_letters/cover_*.tex` or `cover_letters/Cover_*.tex` file as a template reference
+Also read the most relevant existing source files for concrete structural reference (one of each is enough):
+- The master `cv/main_example.yaml` (or any existing `cv/main_*.yaml`) as a RenderCV template reference
+- `cover_letters/cover_example.typ` (or any existing `cover_letters/cover_*.typ`) as a Typst template reference
 
-### CV (`cv/main_<company>.tex`)
+### CV (`cv/main_<company>.yaml`)
 - Always in **English**
-- Follow the moderncv/banking format from `05-cv-templates.md`
-- Tailor the profile statement and experience bullets to the specific role
+- Follow the RenderCV `classic` format from `05-cv-templates.md` (see the `rendercv` skill for schema)
+- Copy the master `cv/main_example.yaml` and tailor the profile statement and experience highlights to the role
 - Reframe skills and achievements to match job requirements
-- Keep to 2 pages
+- Keep to 1-2 pages
 
-### Cover Letter (`cover_letters/cover_<company>_<role>.tex`)
+### Cover Letter (`cover_letters/cover_<company>_<role>.typ`)
 - **Match the language of the job posting** (Danish posting -> Danish cover letter, English posting -> English cover letter)
 - Follow the structure from `06-cover-letter-templates.md`
-- Use the `cover.cls` template
+- Copy `cover_letters/cover_example.typ`, which imports the shared `template.typ`
 - Tailor the opening paragraph to the specific role and company
 - Address to a named person if available in the posting, otherwise "Dear Hiring Manager" (or equivalent in posting language)
 - Keep to approximately one page
@@ -85,7 +85,7 @@ Write both files to disk. Keep the exact text of both drafts in working memory �
 
 ## Step 3: REVIEWER - Research & Critique
 
-Use the **Agent tool** to spawn a `general-purpose` reviewer agent. The reviewer gets a fresh context, so pass the drafts **inline in the prompt** below (do not make the reviewer Read them). Scope the reviewer's file reads to content-critique essentials only — the reviewer does not need the LaTeX template files (`05`, `06`) to critique content, since those govern structural/LaTeX concerns the drafter already applied.
+Use the **Agent tool** to spawn a `general-purpose` reviewer agent. The reviewer gets a fresh context, so pass the drafts **inline in the prompt** below (do not make the reviewer Read them). Scope the reviewer's file reads to content-critique essentials only — the reviewer does not need the template files (`05`, `06`) to critique content, since those govern structural/formatting concerns the drafter already applied.
 
 Replace `<COMPANY>`, `<ROLE>`, `<INSERT_JOB_POSTING_TEXT_HERE>`, `<INSERT_CV_DRAFT_HERE>`, and `<INSERT_COVER_LETTER_DRAFT_HERE>` with actual values before dispatching.
 
@@ -108,16 +108,16 @@ Read these four files — and only these — to ground your critique:
 - `.claude/skills/job-application-assistant/03-writing-style.md`
 - `.claude/skills/job-application-assistant/04-job-evaluation.md`
 
-Do NOT read `05-cv-templates.md` or `06-cover-letter-templates.md` — those govern LaTeX structure the drafter already applied and are not needed for content critique.
+Do NOT read `05-cv-templates.md` or `06-cover-letter-templates.md` — those govern document structure the drafter already applied and are not needed for content critique.
 
 ### 3. Drafts to Review
 Both drafts are provided inline below. Do NOT use the Read tool on the draft files — use these exact texts.
 
-<CV_DRAFT file="cv/main_<COMPANY>.tex">
+<CV_DRAFT file="cv/main_<COMPANY>.yaml">
 <INSERT_CV_DRAFT_HERE>
 </CV_DRAFT>
 
-<COVER_LETTER_DRAFT file="cover_letters/cover_<COMPANY>_<ROLE>.tex">
+<COVER_LETTER_DRAFT file="cover_letters/cover_<COMPANY>_<ROLE>.typ">
 <INSERT_COVER_LETTER_DRAFT_HERE>
 </COVER_LETTER_DRAFT>
 
@@ -134,7 +134,7 @@ Return your feedback in **two parts**:
 A JSON array of concrete edits the drafter can apply directly without re-reading the files. Each edit is an object:
 ```json
 {
-  "file": "cv/main_<COMPANY>.tex" | "cover_letters/cover_<COMPANY>_<ROLE>.tex",
+  "file": "cv/main_<COMPANY>.yaml" | "cover_letters/cover_<COMPANY>_<ROLE>.typ",
   "old_string": "<exact text currently in the draft>",
   "new_string": "<replacement text>",
   "reason": "<one-line rationale: keyword match / company angle / reframing / style>"
@@ -175,52 +175,49 @@ After all edits are applied, the two files on disk are the final drafts.
 
 ---
 
-## Step 5: DRAFTER - Compile & Inspect PDFs (MANDATORY)
+## Step 5: DRAFTER - Render & Inspect PDFs (MANDATORY)
 
-**Never skip this step.** The `.tex` files looking fine is not sufficient — LaTeX page-break decisions are unpredictable and commonly produce broken layouts (orphaned job titles separated from their bullets, cover letters spilling to 2 pages, bullet fonts not matching body text). Compile both documents and visually verify the PDFs before presenting.
+**Never skip this step.** The source files looking fine is not sufficient — page count is driven by content and can still come out wrong (CV running to 3 pages, cover letter spilling to 2). Render both documents and visually verify the PDFs before presenting. All commands run inside the project venv (see `SETUP.md`).
 
-### 5a. Compile
+### 5a. Render
 
 ```bash
-cd cv && lualatex -interaction=nonstopmode main_<company>.tex
-cd ../cover_letters && xelatex -interaction=nonstopmode cover_<company>_<role>.tex
+.venv/bin/rendercv render cv/main_<company>.yaml -nomd -nohtml -nopng
+.venv/bin/python cover_letters/render.py cover_letters/cover_<company>_<role>.typ
 ```
 
-- CV uses **lualatex** — pdflatex fails on modern MiKTeX with fontawesome5 font-expansion errors. lualatex handles the same sources cleanly.
-- Cover letter uses **xelatex** — cover.cls requires fontspec.
+- The CV renders to `cv/rendercv_output/` (PDF only — the `-nomd -nohtml -nopng` flags suppress the Markdown, HTML, and PNG outputs).
+- The cover letter PDF is written next to the `.typ`.
 
-If either compile fails, fix the error and re-compile until clean.
+If either render fails (e.g. a RenderCV YAML validation error or a Typst syntax error), fix it and re-render until clean.
 
 ### 5b. Inspect layout
 
-Read both PDFs via the Read tool and verify:
+Read both PDFs (or the PNGs) via the Read tool and verify:
 
-**CV (`cv/main_<company>.pdf`):**
-- [ ] Exactly 2 pages (not 1, not 3)
-- [ ] No orphaned `\cventry` titles — a job/education title line must never sit alone at the bottom of page 1 with its bullets on page 2. This is the most common failure.
-- [ ] Section headings are not isolated at the top of page 2 with only 1-2 lines below
+**CV (`cv/rendercv_output/<name>_CV.pdf`):**
+- [ ] 1 or 2 pages (never 3+) — the Read tool reports the PDF's page count
+- [ ] No nearly-empty trailing page and no single section stranded alone on a third page
 - [ ] No awkward whitespace gaps
 
 **Cover letter (`cover_letters/cover_<company>_<role>.pdf`):**
 - [ ] Exactly 1 page
 - [ ] Signature block visible, not cut off or pushed to a second page
-- [ ] Bullet list font matches surrounding body text (both should be Raleway-Medium)
+- [ ] Accent colour and font match the CV (blue header, Source Sans 3)
 
 ### 5c. Iterate until clean
 
-If the layout has problems, edit the `.tex` files and recompile. Common fixes (see `05-cv-templates.md` and `06-cover-letter-templates.md` for full details):
+If the layout has problems, edit the source files and re-render (see `05-cv-templates.md` and `06-cover-letter-templates.md` for full details):
 
-- **Orphaned CV entry title:** `\usepackage{needspace}` in preamble, then `\needspace{5\baselineskip}` immediately before the problematic `\cventry`
-- **CV spills to page 3 with only a trailing section:** `\enlargethispage{2-3\baselineskip}` before a late section
-- **Substantial content on page 3:** cut content using **relevance-weighted cutting** (see `05-cv-templates.md` → "Relevance-weighted cutting"). Score each candidate line by (a) relevance to THIS posting's keywords and responsibilities, (b) uniqueness (is it duplicated elsewhere?), (c) narrative load (does the cover letter depend on it?). Cut the lowest-total-score line first, regardless of section. Do NOT mechanically apply a static section-based priority order — an older-role bullet that hits posting keywords is worth more than a recent-role bullet that does not.
-- **Cover letter itemize breaks compile or uses wrong font:** close `\lettercontent{}` before the list, wrap the list in `{\raggedright\fontspec[Path = OpenFonts/fonts/raleway/]{Raleway-Medium}\fontsize{11pt}{13pt}\selectfont \begin{itemize}...\end{itemize}\par}`
-- **Cover letter spills to 2 pages:** trim using the same relevance-weighted logic. First cut: sentences that restate what a bullet already said. Second cut: a bullet that does not hit posting keywords. Last resort: a bullet that does hit posting keywords. Never reduce geometry or line spacing.
+- **CV runs to 3+ pages:** cut content using **relevance-weighted cutting** (see `05-cv-templates.md` → "Relevance-weighted cutting"). Score each candidate line by (a) relevance to THIS posting's keywords and responsibilities, (b) uniqueness (is it duplicated elsewhere?), (c) narrative load (does the cover letter depend on it?). Cut the lowest-total-score line first, regardless of section. Do NOT mechanically apply a static section-based priority order — an older-role highlight that hits posting keywords is worth more than a recent-role highlight that does not. Do not shrink the font or margins to force-fit.
+- **CV barely spills onto a 3rd page:** trim one or two low-relevance highlights first; as a last resort nudge `design.sections` spacing or `design.page` margins in the YAML.
+- **Cover letter spills to 2 pages:** trim using the same relevance-weighted logic. First cut: sentences that restate what a bullet already said. Second cut: a bullet that does not hit posting keywords. Last resort: a bullet that does hit posting keywords. Never reduce the font or margins.
 
 Do not proceed to Step 6 until both PDFs pass inspection.
 
-### 5d. Clean up build artifacts
+### 5d. Build artifacts
 
-After the final clean compile, delete the `.aux`, `.log`, `.out` files (keep the `.tex` and `.pdf`).
+The rendered PDFs/PNGs and `cv/rendercv_output/` are git-ignored, so there is nothing to clean up — the source `.yaml` and `.typ` are the artifacts of record.
 
 ---
 
@@ -240,7 +237,7 @@ Summarize 3-5 key decisions made to tailor the application:
 
 ### Files Created
 List the files written:
-- `cv/main_<company>.tex`
-- `cover_letters/cover_<company>_<role>.tex`
+- `cv/main_<company>.yaml` (rendered PDF in `cv/rendercv_output/`)
+- `cover_letters/cover_<company>_<role>.typ` (rendered PDF alongside it)
 
-Tell the user: "Both files are ready for your review. Open them to check the final output before compiling."
+Tell the user: "Both source files and their rendered PDFs are ready for your review."

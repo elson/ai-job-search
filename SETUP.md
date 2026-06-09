@@ -30,15 +30,20 @@ The Danish job portal CLIs are written in TypeScript and run with Bun:
 curl -fsSL https://bun.sh/install | bash
 ```
 
-### LaTeX (for compiling CVs and cover letters)
+### uv (for RenderCV & Typst)
 
-Install a LaTeX distribution to compile the generated `.tex` files to PDF:
+Document rendering uses [RenderCV](https://docs.rendercv.com/) for CVs and [Typst](https://typst.app/) for cover letters, installed into a project virtual environment with [uv](https://docs.astral.sh/uv/):
 
-- **Windows:** [MiKTeX](https://miktex.org/download)
-- **macOS:** [MacTeX](https://tug.org/mactex/)
-- **Linux:** `sudo apt install texlive-full` or `sudo dnf install texlive-scheme-full`
+```bash
+# Install uv (if you don't have it)
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
-The CV compiles with `lualatex` (pdflatex often fails on modern MiKTeX installs with `fontawesome5` font-expansion errors). The cover letter compiles with `xelatex` because `cover.cls` requires `fontspec` for its custom Lato/Raleway fonts.
+# From the repo root: create the venv and install the toolchain
+uv venv
+uv pip install "rendercv[full]" typst
+```
+
+This installs `rendercv` (which bundles its own Typst for CV rendering) and the `typst` Python package used by `cover_letters/render.py` for cover letters. No system LaTeX distribution is required. The classic CV theme and the cover letter both use Source Sans 3, which is bundled in `cover_letters/fonts/`.
 
 ## 2. Fork and clone
 
@@ -78,6 +83,8 @@ Claude will offer two paths:
 
 Both paths produce the same result: fully populated profile files.
 
+> **Already have a RenderCV YAML?** Drop it in `documents/cv/` (or `@`-mention it) and Claude will use it verbatim as your master `cv/main_example.yaml`, in addition to extracting your profile data from it.
+
 ### What gets populated
 
 | File | Content |
@@ -88,7 +95,7 @@ Both paths produce the same result: fully populated profile files.
 | `04-job-evaluation.md` | Personalized skill match areas and career goals |
 | `05-cv-templates.md` | Profile statement templates for your background |
 | `07-interview-prep.md` | STAR examples from your experience |
-| `cv/main_example.tex` | Your LaTeX CV with actual details |
+| `cv/main_example.yaml` | Your master RenderCV CV with actual details |
 | `search-queries.md` | Job search queries for `/scrape` |
 
 ### Re-running setup
@@ -137,16 +144,16 @@ Claude will:
 4. Have a reviewer agent critique the drafts
 5. Revise and present the final output
 
-## 7. Compile your documents
+## 7. Render your documents
 
-After `/apply` creates the LaTeX files:
+`/apply` renders the documents for you, but you can also render manually after editing. Run from the repo root inside the project venv:
 
 ```bash
-# Compile CV
-cd cv && lualatex main_<company>.tex && cd ..
+# Render CV (PDF written to cv/rendercv_output/)
+.venv/bin/rendercv render cv/main_<company>.yaml -nomd -nohtml -nopng
 
-# Compile cover letter
-cd cover_letters && xelatex cover_<company>_<role>.tex && cd ..
+# Render cover letter (PDF written next to the .typ)
+.venv/bin/python cover_letters/render.py cover_letters/cover_<company>_<role>.typ
 ```
 
 ## Troubleshooting
@@ -157,10 +164,7 @@ This is expected if you haven't set up salary benchmarking. The `/apply` workflo
 ### Job search CLI tools not working
 Make sure Bun is installed and you ran `bun install` in each CLI directory. The tools require network access to fetch job listings.
 
-### LaTeX compilation errors
-- CV: uses `lualatex` (pdflatex often fails on modern MiKTeX with `fontawesome5` font-expansion errors; lualatex handles the same sources cleanly)
-- Cover letter: uses `xelatex` (for custom fonts in `OpenFonts/fonts/`)
-- Make sure your LaTeX distribution includes the `moderncv` package
-
-### Fonts not found in cover letter
-The cover letter template expects fonts in `cover_letters/OpenFonts/fonts/`. Make sure this directory exists and contains the Lato and Raleway font files.
+### Rendering errors
+- **`rendercv: command not found`** — activate or reference the venv: run `.venv/bin/rendercv ...`, or `source .venv/bin/activate` first. Re-run `uv pip install "rendercv[full]" typst` if the venv is missing.
+- **CV YAML validation error** — RenderCV validates the YAML (e.g. phone numbers must be valid international format). The error message names the offending field; fix it and re-render.
+- **Cover letter font looks wrong** — `cover_letters/render.py` supplies the bundled Source Sans 3 from `cover_letters/fonts/`. Make sure that directory still contains the `SourceSans3-*.ttf` files.
