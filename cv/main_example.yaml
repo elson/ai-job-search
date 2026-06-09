@@ -1,0 +1,102 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/rendercv/rendercv/refs/tags/v2.8/schema.json
+#
+# Master CV - [YOUR_NAME]
+# Comprehensive overview of all competencies, experience, and achievements.
+# Use as the source of truth when tailoring role-specific CVs.
+#
+# SETUP: Run /setup to populate this with your actual information.
+# Render with (inside the project venv):
+#   .venv/bin/rendercv render cv/main_example.yaml
+# Output (PDF, PNG, HTML, Markdown, Typst) is written to rendercv_output/.
+
+cv:
+  name: "[YOUR_NAME]"
+  location: "[City, Country]"
+  email: "your.email@example.com"
+  phone: "+45 20 12 34 56"
+  social_networks:
+    - network: LinkedIn
+      username: "your-profile"
+    - network: GitHub
+      username: "your-username"
+  sections:
+    profile:
+      - "[Write a 3-5 line profile statement. Focus on what makes you uniquely qualified. Example: Data scientist with a PhD in [field] and X years of industry experience, combining deep domain expertise in [domain] with strong applied machine learning and Python development skills. Experienced in end-to-end ML pipelines, from data ingestion to stakeholder-facing dashboards.]"
+    core_competencies:
+      - label: "[Skill Category 1]"
+        details: "[Specific skills, frameworks, tools. Be concrete.]"
+      - label: "[Skill Category 2]"
+        details: "[Specific skills, frameworks, tools.]"
+      - label: "[Skill Category 3]"
+        details: "[Specific skills, frameworks, tools.]"
+      - label: "[Skill Category 4]"
+        details: "[Domain expertise, methods, approaches.]"
+      - label: "[Skill Category 5]"
+        details: "[Tools, platforms, software.]"
+    experience:
+      - company: "[Company]"
+        position: "[Job Title]"
+        location: "[City, Country]"
+        start_date: "2022-01"
+        end_date: "present"
+        highlights:
+          - "[Achievement or responsibility 1 - be specific, use numbers where possible]"
+          - "[Achievement or responsibility 2]"
+          - "[Achievement or responsibility 3]"
+          - "[Achievement or responsibility 4]"
+      - company: "[Company]"
+        position: "[Job Title]"
+        location: "[City, Country]"
+        start_date: "2019-01"
+        end_date: "2021-12"
+        highlights:
+          - "[Achievement or responsibility 1]"
+          - "[Achievement or responsibility 2]"
+          - "[Achievement or responsibility 3]"
+      - company: "[Company]"
+        position: "[Job Title]"
+        location: "[City, Country]"
+        start_date: "2017-01"
+        end_date: "2018-12"
+        highlights:
+          - "[Achievement or responsibility 1]"
+          - "[Achievement or responsibility 2]"
+    education:
+      - institution: "[Institution]"
+        area: "[Field]"
+        degree: "[Degree]"
+        location: "[City, Country]"
+        start_date: "2013-09"
+        end_date: "2017-06"
+        highlights:
+          - "Thesis: \"[Thesis Title].\" [Brief description of research focus.]"
+      - institution: "[Institution]"
+        area: "[Field]"
+        degree: "[Degree]"
+        location: "[City, Country]"
+        start_date: "2010-09"
+        end_date: "2013-06"
+        highlights:
+          - "[Brief description or key topics.]"
+    languages:
+      - label: "Languages"
+        details: "[Language 1] (native), [Language 2] (fluent), [Language 3] (intermediate)"
+    publications:
+      - title: "[Title]"
+        authors:
+          - "[Author 1]"
+          - "[YOUR_NAME]"
+        journal: "[Journal/Conference]"
+        date: "2020"
+    honors_and_awards:
+      - name: "**[Award Name]** -- [Event/Organization] ([Year])"
+    references:
+      - "Available upon request."
+
+design:
+  theme: classic
+  page:
+    size: a4
+  # The classic theme already uses a blue accent (rgb(0, 79, 144)) for the name,
+  # headline, section titles, and links. Keep it for brand continuity with the
+  # cover letter (cover_letters/template.typ uses the same colour).

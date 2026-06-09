@@ -2,106 +2,73 @@
 
 <!-- SETUP: Profile statements and section ordering are personalized by running /setup -->
 
-## Template: LaTeX moderncv (Banking Style)
+## Template: RenderCV (classic theme)
 
-All CVs use the moderncv LaTeX package with the "banking" style and "blue" color scheme.
+All CVs are written as **RenderCV YAML** and rendered to PDF via Typst. For the full
+RenderCV schema, entry types, design fields, and CLI options, use the bundled
+**`rendercv` skill** (`.claude/skills/rendercv/SKILL.md`) — this file only covers the
+repo-specific conventions and tailoring rules.
 
-**Output file:** `cv/main_<company>.tex`
-**Compile with:** **lualatex** on MiKTeX/TeX Live. pdflatex often fails on modern MiKTeX installs with `fontawesome5` font-expansion errors; lualatex handles the same sources cleanly.
-**Master reference:** `cv/main_example.tex` (comprehensive CV with all competencies, experience, and achievements - use as source when building targeted CVs)
+**Output file:** `cv/main_<company>.yaml`
+**Theme:** `classic` with the default blue accent (`rgb(0, 79, 144)`), A4 page. The
+cover letter (`cover_letters/template.typ`) matches the same colour and font (Source
+Sans 3), so do not change the theme/accent per application — keep CV and letter visually
+consistent.
+**Master reference:** `cv/main_example.yaml` (comprehensive CV with all competencies,
+experience, and achievements — copy it as the starting point when building a targeted CV).
 
-### Compile command
+### Render command
+
+Run inside the project venv (see `SETUP.md` for the one-time `uv venv` setup):
 
 ```bash
-cd cv && lualatex -interaction=nonstopmode main_<company>.tex
+.venv/bin/rendercv render cv/main_<company>.yaml -nomd -nohtml -nopng
 ```
 
-Expected output: `Output written on main_<company>.pdf (2 pages, ...)`. Any page count other than 2 is a failure that must be fixed before presenting to the user.
+The PDF (and Typst source) is written to `cv/rendercv_output/`; the `-nomd -nohtml -nopng`
+flags suppress the Markdown, HTML, and PNG outputs we don't need. Read the PDF via the
+Read tool to check the page count. The CV must be **1 or 2 pages**; 3+ pages is a failure
+that must be fixed before presenting to the user (see relevance-weighted cutting below).
 
-## Document Structure
+### YAML structure
 
-```latex
-\documentclass[11pt,a4paper,sans]{moderncv}
-\moderncvstyle{banking}
-\moderncvcolor{blue}
+The master `cv/main_example.yaml` defines the canonical section set. Tailor a copy by
+editing content, not structure:
 
-% Force both first and last name AND section headings to render in moderncv
-% blue (color1). Default banking on lualatex+MiKTeX leaves these black, which
-% looks inconsistent with the rest of the blue accent scheme.
-\renewcommand*{\firstnamestyle}[1]{{\fontsize{34}{36}\bfseries\upshape\color{color1}#1}}
-\renewcommand*{\lastnamestyle}[1]{{\fontsize{34}{36}\bfseries\upshape\color{color1}#1}}
-\renewcommand*{\sectionstyle}[1]{{\sectionfont\color{color1}#1}}
-
-\usepackage[utf8]{inputenc}
-\usepackage{hyperref}
-\hypersetup{
-    colorlinks=true,
-    linkcolor=blue,
-    filecolor=magenta,
-    urlcolor=blue,
-    pdftitle={[YOUR_NAME] - CV},
-    pdfpagemode=FullScreen,
-}
-\usepackage[scale=0.77]{geometry}
-\usepackage{import}
-
-% Personal data
-\name{[FIRST_NAME]}{[LAST_NAME]}
-\address{[YOUR_ADDRESS]}{}{}
-\phone[mobile]{[YOUR_PHONE]}
-\email{[YOUR_EMAIL]}
-\extrainfo{\href{[YOUR_LINKEDIN_URL]}{LinkedIn}, \href{[YOUR_GITHUB_URL]}{GitHub}}
-
-\begin{document}
-\makecvtitle
-
-% 1. Profile statement (1-3 sentences, tailored per role)
-% 2. Skills section
-% 3. Education section
-% 4. Professional Experience section
-% 5. Selected Publications (if applicable)
-% 6. Honors and Awards (if applicable)
-% 7. References
-
-\end{document}
+```yaml
+cv:
+  name: "..."
+  location: "..."
+  email: "..."
+  phone: "..."          # must be a valid international number (RenderCV validates it)
+  social_networks:
+    - {network: LinkedIn, username: "..."}
+    - {network: GitHub, username: "..."}
+  sections:
+    profile: ["..."]              # TextEntry — the tailored elevator pitch
+    core_competencies: [...]      # OneLineEntry (label + details)
+    experience: [...]             # ExperienceEntry (company, position, dates, highlights)
+    education: [...]              # EducationEntry (institution, area, degree, dates)
+    languages: [...]              # OneLineEntry
+    publications: [...]           # PublicationEntry (title, authors, journal, date)
+    honors_and_awards: [...]      # NormalEntry (name)
+    references: ["..."]           # TextEntry
+design:
+  theme: classic
+  page: {size: a4}
 ```
 
-### Color overrides
-
-The three `\renewcommand*` lines in the preamble are required on lualatex+MiKTeX. Without them the firstname, lastname, and section headings render in black even though `\moderncvcolor{blue}` is set, which looks inconsistent with the rest of the blue accent scheme (links, bullet markers, contact icons). The override forces all three to use `color1` (moderncv's accent colour, which becomes blue under `\moderncvcolor{blue}`). Both names render bold; if you prefer the firstname in regular weight, change the firstnamestyle override from `\bfseries` to `\mdseries`. Don't drop the override - on most modern installs the defaults render visibly wrong.
-
-### Spacing inside itemize lists (important)
-
-**Do not place `\vspace{...}` between `\item` entries in an `itemize` list.** Even though the source looks symmetric, this pattern occasionally produces a noticeably oversized gap before a single item: the inter-item `\vspace` creates a paragraph break that interacts unpredictably with the list's internal `\itemsep`, so LaTeX renders one of the gaps wider than the rest. Remove the inter-item `\vspace` and let `itemize` use its native uniform spacing.
-
-```latex
-% WRONG - intermittently produces an oversized gap before one bullet
-\begin{itemize}
-\item \textbf{Foo}: ...
-\vspace{1pt}
-\item \textbf{Bar}: ...
-\vspace{1pt}
-\item \textbf{Baz}: ...
-\end{itemize}
-
-% RIGHT - uniform spacing using the list's native itemsep
-\begin{itemize}
-\item \textbf{Foo}: ...
-\item \textbf{Bar}: ...
-\item \textbf{Baz}: ...
-\end{itemize}
-```
-
-Two related patterns are fine and should be kept:
-- `\vspace{1pt}` immediately after `\section{...}` (between section heading and first item) - this is between the heading and the list, not between list items.
-- `\vspace{3pt}` between top-level `\cventry` blocks in Professional Experience or Education - this gives breathing room between roles and renders consistently.
+**YAML gotcha:** always wrap any string containing a colon in double quotes, or the YAML
+parser breaks (highlights and summaries often contain colons). Inline Markdown
+(`**bold**`, `*italic*`, `[text](url)`) works in any text field; block Markdown does not.
 
 ## Section-by-Section Tailoring
 
 ### Profile Statement / Elevator Pitch (Best Practice)
-This is the most important section to customize. It appears right after `\makecvtitle`.
+This is the most important section to customize. It is the `profile` TextEntry at the top.
 
-Write 5-7 lines that function as an "elevator pitch": a concise, compelling introduction explaining why you're qualified for *this specific role*. Focus on what the employer gains from hiring you.
+Write 5-7 lines that function as an "elevator pitch": a concise, compelling introduction
+explaining why you're qualified for *this specific role*. Focus on what the employer gains.
 
 **Create 2-3 profile statement templates for your main role types:**
 
@@ -113,115 +80,126 @@ Write 5-7 lines that function as an "elevator pitch": a concise, compelling intr
 > [YOUR_PROFILE_STATEMENT_TEMPLATE_2]
 
 ### Core Competencies / Skills Section (Best Practice)
-Reorder and emphasize based on the role. Use bold category labels.
-
-List **5-7 key competencies** in bullet format, tailored to the specific job. For each competency, briefly explain how it adds value to the position.
+Reorder and emphasize based on the role. Each is a OneLineEntry with a bold `label` and
+`details`. List **5-7 key competencies**, tailored to the specific job.
 
 ### Education
 - Always include your highest degrees
 - For senior roles, keep education brief (dates and titles only)
-- Include thesis topics when relevant to the target role
+- Include thesis topics (in `highlights`) when relevant to the target role
 
 ### Professional Experience
-- Rewrite bullet points to emphasize aspects most relevant to the target role
-- Use 4-6 bullets for most recent role, 3-4 for previous, 2-3 for older
-- **Emphasize measurable results** where possible: "Reduced processing time by X%", "Model adopted by the team"
+- Rewrite `highlights` to emphasize aspects most relevant to the target role
+- Use 4-6 highlights for the most recent role, 3-4 for previous, 2-3 for older
+- **Emphasize measurable results**: "Reduced processing time by X%", "Model adopted by the team"
 
 ### Handling Employment Gaps (Best Practice)
 If there is a gap in your employment history:
-- The gap should be explained matter-of-factly if needed
+- Explain it matter-of-factly if needed
 - Describe how professional development continued during the gap
 - Frame as deliberate skill-building and career repositioning
 
 ### Publications
-- Include Google Scholar link if applicable
+- Include a DOI or `url` if applicable
 - Select 3-4 most relevant publications (not always all of them)
 - For non-academic roles, keep brief
 
 ### Honors and Awards
-- Keep format brief, one line each
+- Keep format brief, one line each (a NormalEntry `name`)
 
 ### References
-- List 2-4 references with name, title, company, and contact
-- End with: "More references are available upon request."
-- **Do not attach reference letters** - employers typically contact references directly
+- List 2-4 references with name, title, company, and contact, or "Available upon request."
+- **Do not attach reference letters** — employers typically contact references directly
 
-## Compile-and-Inspect Loop (MANDATORY)
+## Render-and-Inspect Loop (MANDATORY)
 
-After writing the CV and before presenting to the user, always compile and visually inspect the PDF. Iterate until the layout is clean. Workflow:
+After writing the CV and before presenting to the user, always render and visually inspect
+the PDF. Iterate until the layout is clean. Workflow:
 
-1. Run `lualatex -interaction=nonstopmode main_<company>.tex`
-2. Check the output page count: must be exactly 2
-3. Read the PDF via the Read tool and visually inspect both pages
-4. Check for **orphaned entries**: a `\cventry` title line must never sit alone at the bottom of page 1 with its bullets on page 2
+1. Run `.venv/bin/rendercv render cv/main_<company>.yaml -nomd -nohtml -nopng`
+2. Read `cv/rendercv_output/<name>_CV.pdf` via the Read tool — it reports the page count, which must be **1 or 2**
+3. Visually inspect every page of the PDF
+4. Check that the content ends cleanly — no nearly-empty final page, no single orphaned
+   section stranded on a third page
 
-### Fixing common page-break problems
+### Fixing page-count problems
 
-**Problem: entry title on page 1, bullets orphaned to page 2**
-Add `\needspace{5\baselineskip}` immediately before the problematic `\cventry`:
-```latex
-\needspace{5\baselineskip}
-\item{\cventry{YEAR--YEAR}{Role Title}{Organization}{Location}{}{...}}
-```
-Include `\usepackage{needspace}` in the preamble.
+RenderCV controls layout from content and the `design` block — there are no manual
+page-break commands to babysit. So:
 
-**Problem: one trailing section spills to page 3 (e.g., References alone on page 3)**
-Add `\enlargethispage{2-3\baselineskip}` before a late section (e.g., before `\section{Honors and Awards}`) to stretch page 2 by a few lines. This is the standard LaTeX rescue for near-miss overflows.
+- **3+ pages:** cut content using relevance-weighted cutting (below). Do not shrink the
+  font or margins to force-fit.
+- **Trailing content barely spills onto a 3rd page:** trim one or two low-relevance
+  highlights first. As a last resort you may tighten spacing via `design.sections`
+  (e.g. `space_between_regular_entries`) or `design.page` margins — but prefer cutting.
+- **CV ends very early on page 2 (feels thin):** restore the highest-relevance item that
+  was previously cut.
 
-**Problem: 3 pages with significant content on page 3**
-Cut content — do not compress geometry or `\vspace`. See "Relevance-weighted cutting" below for the rule.
+## Page Budget — 1-2 page target
 
-**Problem: content finishes early on page 2 (feels thin)**
-Restore the highest-relevance item that was previously cut — a CV that ends mid-page 2 looks incomplete.
-
-## Page Budget - Hard 2-Page Limit
-
-The CV **must** fit on exactly 2 pages when compiled. Use these content limits as a guide:
+The CV should fit on **1 or 2 pages**. Use these content limits as a guide:
 
 | Section | Max budget |
 |---------|-----------|
 | Profile statement | 3-4 lines |
 | Skills | 5 items, each 1-2 lines |
-| Most recent role | 4-5 bullets |
-| Previous role | 2-3 bullets |
-| Older roles | 2 bullets (1 line each) |
+| Most recent role | 4-5 highlights |
+| Previous role | 2-3 highlights |
+| Older roles | 2 highlights (1 line each) |
 | Education | 2-3 entries |
 | Publications | 2-3 entries |
 | Awards | 3 entries, single line each |
 | References | "Available upon request." (single line) |
 
-**If in doubt, cut rather than squeeze.** Reducing `\vspace` or geometry scale to force-fit content makes the CV look cramped.
+**If in doubt, cut rather than squeeze.** Reducing spacing to force-fit content makes the
+CV look cramped.
 
 ## Relevance-weighted cutting (the right way to shrink a CV)
 
-**Cut by signal, not by section.** Static priority lists ("remove oldest education first, then shorten the earliest role...") are wrong when a relevant "lower-priority" item is competing with an irrelevant "higher-priority" item. An older-role bullet that speaks directly to the posting is worth more than a recent-role bullet that does not.
+**Cut by signal, not by section.** Static priority lists ("remove oldest education first,
+then shorten the earliest role...") are wrong when a relevant "lower-priority" item is
+competing with an irrelevant "higher-priority" item. An older-role highlight that speaks
+directly to the posting is worth more than a recent-role highlight that does not.
 
 For every candidate line, score three things:
 
-1. **Relevance to THIS posting** — does the line hit a named tool, keyword, or stated responsibility in the job ad?
-2. **Uniqueness** — is it the only place this claim appears, or is it duplicated elsewhere in the CV?
-3. **Narrative load** — does the cover letter depend on it? If cutting the line would force you to rewrite a cover-letter paragraph, it is load-bearing.
+1. **Relevance to THIS posting** — does the line hit a named tool, keyword, or stated
+   responsibility in the job ad?
+2. **Uniqueness** — is it the only place this claim appears, or is it duplicated?
+3. **Narrative load** — does the cover letter depend on it? If cutting the line would
+   force you to rewrite a cover-letter paragraph, it is load-bearing.
 
 Cut the lowest-total-score line first, regardless of which section it sits in.
 
 ### Practical order of cuts (easiest → last resort)
 
-1. **Redundancy.** If an achievement appears in both Core Competencies AND a role bullet, the Core Competencies version is usually the cleaner cut (the experience bullet is more concrete evidence).
-2. **Profile-statement fluff.** A sentence that just restates what Publications or Skills will show. ("Peer-reviewed publications on X..." is already a Publications entry — profile can claim it once and stop.)
-3. **Low-relevance experience bullets.** A bullet about work that does not touch posting keywords, wherever it sits. This cuts across sections before touching the structural list.
-4. **Low-relevance supporting content.** An older-role bullet that does not speak to the target role. A certification that does not touch the posting's stack. A language entry that can be condensed to one line.
-5. **Low-relevance publications.** Keep 1-2 publications that best match the posting. Cut the rest before touching experience bullets.
-6. **Last-resort structural cuts.** Oldest education entry, tightening an older role to 2 bullets, collapsing Certifications into a single line. These only happen if the relevance-weighted cuts above have already been exhausted.
+1. **Redundancy.** If an achievement appears in both Core Competencies AND a role
+   highlight, the Core Competencies version is usually the cleaner cut.
+2. **Profile-statement fluff.** A sentence that just restates what Publications or Skills
+   will show.
+3. **Low-relevance experience highlights.** A highlight about work that does not touch
+   posting keywords, wherever it sits.
+4. **Low-relevance supporting content.** An older-role highlight that does not speak to
+   the target role; a certification that does not touch the posting's stack; a language
+   entry that can be condensed.
+5. **Low-relevance publications.** Keep 1-2 that best match the posting; cut the rest
+   before touching experience highlights.
+6. **Last-resort structural cuts.** Oldest education entry, tightening an older role to 2
+   highlights, collapsing certifications into a single line.
 
 ### Pitfalls to avoid
 
-- Do not mechanically cut from the bottom of a static section list without checking relevance. "Cut the oldest role first" is wrong if that role is literally about the skill the posting asks for.
-- Do not cut the one concrete example the cover letter leans on. Relevance is measured against the cover letter you wrote, not just the job posting — interviewers will have read both.
-- Do not cut to fit if the fit is borderline (2.02 pages). Prefer `\enlargethispage{2-3\baselineskip}` on a late section for near-misses; reserve content cuts for genuine overflow (content on page 3 that is more than a single trailing section).
+- Do not mechanically cut from the bottom of a static section list without checking
+  relevance. "Cut the oldest role first" is wrong if that role is literally about the
+  skill the posting asks for.
+- Do not cut the one concrete example the cover letter leans on. Relevance is measured
+  against the cover letter you wrote, not just the job posting.
+- Do not cut to fit if it is a borderline near-miss — trim a highlight or nudge
+  `design` spacing before sacrificing a whole entry.
 
 ## Recommended Section Order
 
-The section order varies by role type:
+The section order (the order of keys under `cv.sections`) varies by role type:
 
 **For technical / data science / ML roles:**
 1. Profile statement / elevator pitch
@@ -235,7 +213,7 @@ The section order varies by role type:
 **For domain-specific / specialist roles:**
 1. Profile statement / elevator pitch
 2. Core competencies / Skills
-3. Education (reverse chronological) - credentials are a key qualifier
+3. Education (reverse chronological) — credentials are a key qualifier
 4. Professional Experience (reverse chronological)
 5. Publications & Awards
 6. References

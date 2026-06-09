@@ -6,8 +6,8 @@
 ## Role
 This repo is a job application workspace. Claude acts as a career advisor and application assistant for [YOUR_NAME], helping with:
 1. **Job fit evaluation** - Assess job postings against your profile (skills, experience, behavioral traits)
-2. **CV tailoring** - Adapt existing CV templates (LaTeX/moderncv) to target specific roles
-3. **Cover letter writing** - Draft targeted cover letters using existing templates (LaTeX)
+2. **CV tailoring** - Adapt the master RenderCV CV (YAML) to target specific roles
+3. **Cover letter writing** - Draft targeted cover letters using the Typst template
 4. **Interview preparation** - Prepare answers, questions, and talking points for interviews
 5. **Career strategy** - Advise on positioning and personal branding
 
@@ -77,15 +77,15 @@ This repo is a job application workspace. Claude acts as a career advisor and ap
 - [DEALBREAKER_2]
 
 ## Repo Structure
-- `cv/` - LaTeX CV variants (moderncv template, banking style)
-- `cover_letters/` - LaTeX cover letters (custom cover.cls template)
+- `cv/` - RenderCV CV variants (YAML, `classic` theme); master is `main_example.yaml`
+- `cover_letters/` - Typst cover letters (`template.typ` + `render.py`, Source Sans 3 in `fonts/`)
 - `.claude/skills/` - AI skill definitions for the application workflow
 - `.agents/skills/` - Job search CLI tools
 
 ## Workflow for New Job Applications
 1. User provides a job posting (URL or text)
 2. **Always evaluate fit first**: skills match, experience match, behavioral/culture match. Present this assessment to the user before proceeding.
-3. If good fit: create targeted CV (`cv/main_<company>.tex`) and cover letter (`cover_letters/cover_<company>_<role>.tex`)
+3. If good fit: create targeted CV (`cv/main_<company>.yaml`) and cover letter (`cover_letters/cover_<company>_<role>.typ`)
 4. **Verify both documents** (see Verification Checklist below)
 5. Prepare interview talking points based on the role requirements and your strengths
 
@@ -107,22 +107,22 @@ After creating or updating a CV or cover letter, re-read the generated file and 
 - [ ] Nice-to-have requirements are highlighted where there is a match
 
 ### Consistency
-- [ ] CV follows the standard 2-page moderncv/banking format
-- [ ] Cover letter uses cover.cls template and established structure
+- [ ] CV is a RenderCV YAML using the `classic` theme (1-2 pages)
+- [ ] Cover letter uses the `template.typ` Typst template and established structure
 - [ ] Tone is consistent across CV and cover letter
 - [ ] No contradictions between CV and cover letter content
 
 ### Quality
-- [ ] No LaTeX syntax errors (balanced braces, correct commands)
+- [ ] No YAML or Typst syntax errors (renders cleanly without errors)
 - [ ] No spelling or grammar errors
 - [ ] Agentic coding / AI tooling references mention **Claude Code** by name
 - [ ] Cover letter is addressed to the correct person (or "Dear Hiring Manager" if unknown)
 - [ ] Cover letter fits approximately one page
 
-### Compiled PDF verification (MANDATORY - never skip)
-Both documents MUST be compiled and visually inspected via the Read tool on the PDF output. "Looks fine in the .tex" is not acceptable - LaTeX page-break decisions are unpredictable. Iterate until these all pass:
-- [ ] CV compiled with **lualatex** (pdflatex often fails on modern MiKTeX with fontawesome5 font-expansion errors). Cover letter compiled with **xelatex** (cover.cls requires fontspec).
-- [ ] **CV is exactly 2 pages** - not 1, not 3
-- [ ] **No orphaned `\cventry` titles** - a job/education title must never sit at the bottom of a page with its bullets spilling to the next page. Use `\needspace{5\baselineskip}` before each `\cventry` to prevent this, and `\enlargethispage{2-3\baselineskip}` to rescue a trailing section that just barely spills
+### Rendered PDF verification (MANDATORY - never skip)
+Both documents MUST be rendered and visually inspected via the Read tool on the PDF output. "Looks fine in the source" is not acceptable - page count is driven by content. Render inside the project venv. Iterate until these all pass:
+- [ ] CV rendered with `.venv/bin/rendercv render cv/main_<company>.yaml -nomd -nohtml -nopng` (no render/validation errors). Cover letter rendered with `.venv/bin/python cover_letters/render.py cover_letters/cover_<company>_<role>.typ` (no Typst errors).
+- [ ] **CV is 1 or 2 pages** - never 3+ (the Read tool reports the PDF page count). If it overflows, trim via relevance-weighted cutting (see `05-cv-templates.md`); do not shrink the font or margins.
+- [ ] **No stranded content** - the CV must not end on a nearly-empty page, nor leave a single section alone on a third page
 - [ ] **Cover letter is exactly 1 page** - signature block must fit with the body, never overflow
-- [ ] **Cover letter bullet font matches body font** - `\lettercontent{}` must not wrap `\begin{itemize}...\end{itemize}` (the command's trailing `\\` errors on `\end{itemize}`, and moving itemize outside loses the Raleway font). Standard pattern: close `\lettercontent{}`, then wrap the list in `{\raggedright\fontspec[Path = OpenFonts/fonts/raleway/]{Raleway-Medium}\fontsize{11pt}{13pt}\selectfont \begin{itemize}...\end{itemize}\par}`
+- [ ] **Cover letter matches the CV** - blue accent header and Source Sans 3 font, consistent with the rendered CV

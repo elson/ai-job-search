@@ -1,0 +1,15 @@
+[project]
+name = "ai-job-search"
+version = "0.1.0"
+description = "Claude Code-driven job-application workspace. CVs via RenderCV, cover letters via Typst."
+requires-python = ">=3.10"
+dependencies = [
+    # CV rendering: YAML -> Typst -> PDF. [full] pulls in the bundled fonts.
+    "rendercv[full]>=2.8",
+    # Standalone Typst compiler for the hand-built cover letters.
+    "typst>=0.13",
+]
+
+[tool.uv]
+# This project is a document workspace, not an importable package.
+package = false

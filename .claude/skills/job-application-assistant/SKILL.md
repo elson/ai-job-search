@@ -20,15 +20,15 @@ When the user provides a job posting (URL or text), follow this workflow:
 - Ask the user if they want to proceed with an application
 
 ### Step 2: Tailor CV
-- Read the most relevant existing CV variant from `cv/` as a starting point
-- Follow the guidelines in `05-cv-templates.md`
-- Create `cv/main_<company>.tex` with tailored content
-- Adjust: profile statement, skills section, experience bullet emphasis, section order
+- Copy the master `cv/main_example.yaml` (or the most relevant existing variant) as a starting point
+- Follow the guidelines in `05-cv-templates.md` (RenderCV YAML; see the `rendercv` skill for schema)
+- Create `cv/main_<company>.yaml` with tailored content
+- Adjust: profile statement, skills section, experience highlight emphasis, section order
 
 ### Step 3: Write Cover Letter
 - Follow the writing style rules in `03-writing-style.md` (critical: no em-dashes, no cliches)
-- Follow the template structure in `06-cover-letter-templates.md`
-- Create `cover_letters/cover_<company>_<role>.tex`
+- Follow the template structure in `06-cover-letter-templates.md` (Typst; copy `cover_letters/cover_example.typ`)
+- Create `cover_letters/cover_<company>_<role>.typ`
 - Ensure the letter connects specific experience to the role requirements
 
 ### Step 4: Interview Preparation
@@ -47,8 +47,8 @@ When the user provides a job posting (URL or text), follow this workflow:
 | `02-behavioral-profile.md` | Behavioral assessment, strengths, ideal environments |
 | `03-writing-style.md` | Tone, structure, do's and don'ts |
 | `04-job-evaluation.md` | Scoring framework for job fit |
-| `05-cv-templates.md` | LaTeX CV structure and tailoring rules |
-| `06-cover-letter-templates.md` | LaTeX cover letter structure and tailoring rules |
+| `05-cv-templates.md` | RenderCV (YAML) CV structure and tailoring rules |
+| `06-cover-letter-templates.md` | Typst cover letter structure and tailoring rules |
 | `07-interview-prep.md` | STAR examples, tough questions, roleplay guidelines |
 
 ---
