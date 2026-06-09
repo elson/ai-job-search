@@ -14,9 +14,9 @@ documents/
 ├── references/                  # Reference letters
 ├── applications/                # Past job applications
 │   └── <company>_<role>/
-│       ├── job_posting.md       # The original job posting (paste as text)
-│       ├── cover_letter.typ     # The cover letter you submitted
-│       ├── cv_draft.yaml        # The CV variant you submitted
+│       ├── job_posting.md       # The original job posting (.md text or .pdf)
+│       ├── cover_letter.typ     # The cover letter you submitted (.typ, .pdf, or .md)
+│       ├── cv_draft.yaml        # The CV variant you submitted (.yaml or .pdf)
 │       └── outcome.md           # Result + notes (fill in after hearing back)
 └── README.md                    # This file
 ```
@@ -112,11 +112,11 @@ applications/
 
 ### Files within each application folder
 
-**`job_posting.md`** — Paste the full job posting text here. Used by `/setup` to infer which skills and role types you have targeted, and to calibrate `04-job-evaluation.md`.
+**`job_posting.md`** (or `job_posting.pdf`) — The full job posting, pasted as text or saved as a PDF. Used by `/setup` to infer which skills and role types you have targeted, and to calibrate `04-job-evaluation.md`.
 
-**`cover_letter.typ`** — The cover letter you actually submitted. Used to extract writing style patterns and structure for `06-cover-letter-templates.md`.
+**`cover_letter.typ`** (or `cover_letter.pdf` / `cover_letter.md`) — The cover letter you actually submitted, in whichever format you kept it. Used to extract writing style patterns and structure for `06-cover-letter-templates.md`.
 
-**`cv_draft.yaml`** — The CV variant you submitted. Used to extract profile statement styles for `05-cv-templates.md`.
+**`cv_draft.yaml`** (or `cv_draft.pdf`) — The CV variant you submitted, in whichever format you kept it. Used to extract profile statement styles for `05-cv-templates.md`.
 
 **`outcome.md`** — Fill this in after the application resolves. Format:
 
