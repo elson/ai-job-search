@@ -101,9 +101,9 @@ Read each document found in Step A1. Process subfolders in this order: `cv/`, `l
 **`references/` documents:** referee name, title, organization; full text of the letter (extract specific quotes); competency language used.
 
 **`applications/<company>_<role>/` subfolders:**
-- `job_posting.md`: role title, company, required skills, experience level, sector, role type
-- `cover_letter.typ`: opening structure, body structure, bullet style, closing, recurring phrases
-- `cv_draft.yaml`: profile statement, section ordering, framing for this role type
+- `job_posting.md` or `job_posting.pdf`: role title, company, required skills, experience level, sector, role type. If both are present, prefer `.md` (text source) over `.pdf`.
+- `cover_letter.typ`, `cover_letter.pdf`, or `cover_letter.md`: opening structure, body structure, bullet style, closing, recurring phrases. If more than one is present for the same application, prefer `.typ` (structural source), then `.md`, then `.pdf`.
+- `cv_draft.yaml` or `cv_draft.pdf`: profile statement, section ordering, framing for this role type. If both are present, prefer `.yaml` (structural source) over `.pdf`.
 - `outcome.md`: status (hired/rejected/no_response/interview_only), interview stages, notes
 
 **RenderCV YAML in `cv/`:** if any `documents/cv/*.yaml` file is present, treat it as a ready-made RenderCV CV. It is **authoritative**: in Step 3 it is copied verbatim to `cv/main_example.yaml` and also parsed here for profile data (name, contact, experience, education, skills, publications).
@@ -147,10 +147,10 @@ For each skill file, compare extracted document content against the current file
 **Inference rules** (apply when populating from inferred sources):
 
 - **`02-behavioral-profile.md`:** Source is LinkedIn About + recommendation letters. Extract recurring themes, adjectives, phrases about how the candidate works. Add only to "Strongest Behavioral Traits", "How [Candidate] Works Best", or "Management Style Preferences" sections. Do not overwrite existing scored assessments. Always label inferred additions: *[Inferred from LinkedIn About / Reference letter - review before relying on this]*
-- **`03-writing-style.md`:** Source is `cover_letter.typ` files. Extract recurring patterns. Add as observations under "## Patterns Observed in Past Applications". Do not modify existing rules. Only add if 2+ cover letters show a genuine pattern.
-- **`04-job-evaluation.md`:** Source is `job_posting.md` + `outcome.md` pairs. If an application reached interview or offer: note role type and sector as a confirmed strong-fit signal. If 2+ applications repeat a no-response or rejection pattern: note it. Add findings under "## Calibration from Past Applications". Do not modify the existing scoring framework.
-- **`05-cv-templates.md`:** Source is `cv_draft.yaml` files. Extract any profile statement that does not already appear in templates. Label with: *[Used for: <company>_<role>]*
-- **`06-cover-letter-templates.md`:** Source is `cover_letter.typ` files. Extract opening patterns, bullet structures, closing formulations. Add only what is structurally distinct from existing templates.
+- **`03-writing-style.md`:** Source is `cover_letter.{typ,pdf,md}` files. Extract recurring patterns. Add as observations under "## Patterns Observed in Past Applications". Do not modify existing rules. Only add if 2+ cover letters show a genuine pattern.
+- **`04-job-evaluation.md`:** Source is `job_posting.{md,pdf}` + `outcome.md` pairs. If an application reached interview or offer: note role type and sector as a confirmed strong-fit signal. If 2+ applications repeat a no-response or rejection pattern: note it. Add findings under "## Calibration from Past Applications". Do not modify the existing scoring framework.
+- **`05-cv-templates.md`:** Source is `cv_draft.{yaml,pdf}` files. Extract any profile statement that does not already appear in templates. Label with: *[Used for: <company>_<role>]*
+- **`06-cover-letter-templates.md`:** Source is `cover_letter.{typ,pdf,md}` files. Extract opening patterns, bullet structures, closing formulations. Add only what is structurally distinct from existing templates.
 - **`07-interview-prep.md`:** Source is CV bullets, LinkedIn descriptions, reference letter quotes. Identify achievements not yet covered by an existing STAR example. Do NOT draft full STAR examples. Add stubs under "## STAR Candidates (Complete Manually)":
 
 ```markdown
